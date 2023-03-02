@@ -1,4 +1,4 @@
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["https://flourishing-pegasus-8ffc5f.netlify.app/"];
 
 const corsOptions = {
   origin: (origin, callback) => {
