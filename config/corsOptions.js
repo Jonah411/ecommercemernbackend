@@ -1,4 +1,4 @@
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["https://ecommercemernbackend.onrender.com/"];
 
 const corsOptions = {
   origin: (origin, callback) => {
