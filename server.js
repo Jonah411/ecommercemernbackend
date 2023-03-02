@@ -2,9 +2,17 @@ const express = require("express");
 const connectDB = require("./config/dbConnection");
 const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const cors = require("cors");
 //const corsOptions = require("./config/corsOptions");
+
+// Proxy middleware configuration
+const apiProxy = createProxyMiddleware("/api", {
+  target: "https://ecommercemernbackend.onrender.com",
+  changeOrigin: true,
+  secure: false,
+});
 
 connectDB();
 const app = express();
