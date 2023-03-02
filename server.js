@@ -4,7 +4,7 @@ const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
 
 const cors = require("cors");
-const corsOptions = require("./config/corsOptions");
+//const corsOptions = require("./config/corsOptions");
 
 connectDB();
 const app = express();
@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 
 app.use("/categories", express.static("public"));
 //app.use(cors({ origin: ['http://localhost:3000'] }));
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
