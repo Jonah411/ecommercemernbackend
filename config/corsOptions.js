@@ -1,4 +1,4 @@
-const allowedOrigins = ["https://dynamic-brioche-9b7fcc.netlify.app/"];
+const allowedOrigins = ["http://localhost:3000"];
 
 const corsOptions = {
   origin: (origin, callback) => {
