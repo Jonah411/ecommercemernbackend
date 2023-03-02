@@ -13,6 +13,8 @@ const apiProxy = createProxyMiddleware("/api", {
   changeOrigin: true,
   secure: false,
 });
+// Use the proxy middleware
+app.use(apiProxy);
 
 connectDB();
 const app = express();
