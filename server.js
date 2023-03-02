@@ -20,6 +20,7 @@ const apiProxy = createProxyMiddleware("/api", {
 app.use(
   cors({
     origin: "https://benevolent-pasca-e6bd32.netlify.app",
+    credentials: true,
   })
 );
 
