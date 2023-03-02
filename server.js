@@ -5,7 +5,9 @@ const dotenv = require("dotenv").config();
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const cors = require("cors");
-//const corsOptions = require("./config/corsOptions");
+
+connectDB();
+const app = express();
 
 // Proxy middleware configuration
 const apiProxy = createProxyMiddleware("/api", {
@@ -14,16 +16,19 @@ const apiProxy = createProxyMiddleware("/api", {
   secure: false,
 });
 
-connectDB();
-const app = express();
+// Configure CORS middleware
+app.use(
+  cors({
+    origin: "https://benevolent-pasca-e6bd32.netlify.app",
+  })
+);
+
 // Use the proxy middleware
 app.use(apiProxy);
 
 const port = process.env.PORT || 5000;
 
 app.use("/categories", express.static("public"));
-//app.use(cors({ origin: ['http://localhost:3000'] }));
-app.use(cors());
 app.use(express.json());
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
@@ -35,6 +40,7 @@ app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/order", require("./routes/orderRoutes"));
 app.use("/api/address", require("./routes/addressRoutes"));
 app.use(errorHandler);
+
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
 });
