@@ -1,4 +1,4 @@
-const allowedOrigins = ["https://ecommercemernbackend.onrender.com/"];
+const allowedOrigins = ["https://dynamic-brioche-9b7fcc.netlify.app/"];
 
 const corsOptions = {
   origin: (origin, callback) => {
