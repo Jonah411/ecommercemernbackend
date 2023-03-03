@@ -1,32 +1,19 @@
 const express = require("express");
 const connectDB = require("./config/dbConnection");
 const errorHandler = require("./middleware/errorHandler");
-const dotenv = require("dotenv").config();
-//const { createProxyMiddleware } = require("http-proxy-middleware");
+require("dotenv").config();
 
 const cors = require("cors");
-//const corsOptions = require("./config/corsOptions");
+const corsOptions = require("./config/corsOptions");
 
 connectDB();
 const app = express();
 
-// Proxy middleware configuration
-// const apiProxy = createProxyMiddleware("/api", {
-//   target: "https://ecommercemernbackend.onrender.com",
-//   changeOrigin: true,
-//   secure: false,
-// });
+app.use(cors(corsOptions)); // Use the cors middleware with the options
 
-//Configure CORS middleware
-app.use(
-  cors({
-    origin: "https://640185000eea610b9f072a03--regal-pika-79db80.netlify.app/",
-    credentials: true,
-  })
-);
+// Your routes and other middleware go here
 
-// Use the proxy middleware
-//app.use(cors(corsOptions));
+app.use(errorHandler); // Your error handler middleware
 
 const port = process.env.PORT || 5000;
 
@@ -41,7 +28,6 @@ app.use("/api/wishlist", require("./routes/wishListRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/order", require("./routes/orderRoutes"));
 app.use("/api/address", require("./routes/addressRoutes"));
-app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
