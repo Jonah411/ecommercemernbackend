@@ -5,6 +5,7 @@ const dotenv = require("dotenv").config();
 //const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const cors = require("cors");
+//const corsOptions = require("./config/corsOptions");
 
 connectDB();
 const app = express();
@@ -16,16 +17,16 @@ const app = express();
 //   secure: false,
 // });
 
-// Configure CORS middleware
-// app.use(
-//   cors({
-//     origin: "https://640185000eea610b9f072a03--regal-pika-79db80.netlify.app/",
-//     credentials: true,
-//   })
-// );
+//Configure CORS middleware
+app.use(
+  cors({
+    origin: "https://640185000eea610b9f072a03--regal-pika-79db80.netlify.app/",
+    credentials: true,
+  })
+);
 
 // Use the proxy middleware
-app.use(cors());
+//app.use(cors(corsOptions));
 
 const port = process.env.PORT || 5000;
 
