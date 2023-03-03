@@ -2,7 +2,7 @@ const express = require("express");
 const connectDB = require("./config/dbConnection");
 const errorHandler = require("./middleware/errorHandler");
 const dotenv = require("dotenv").config();
-const { createProxyMiddleware } = require("http-proxy-middleware");
+//const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const cors = require("cors");
 
@@ -10,22 +10,22 @@ connectDB();
 const app = express();
 
 // Proxy middleware configuration
-const apiProxy = createProxyMiddleware("/api", {
-  target: "https://ecommercemernbackend.onrender.com",
-  changeOrigin: true,
-  secure: false,
-});
+// const apiProxy = createProxyMiddleware("/api", {
+//   target: "https://ecommercemernbackend.onrender.com",
+//   changeOrigin: true,
+//   secure: false,
+// });
 
 // Configure CORS middleware
-app.use(
-  cors({
-    origin: "https://640185000eea610b9f072a03--regal-pika-79db80.netlify.app/",
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: "https://640185000eea610b9f072a03--regal-pika-79db80.netlify.app/",
+//     credentials: true,
+//   })
+// );
 
 // Use the proxy middleware
-app.use(apiProxy);
+app.use(cors());
 
 const port = process.env.PORT || 5000;
 
