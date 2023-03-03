@@ -1,6 +1,6 @@
 const allowedOrigins = [
-  "https://main--regal-pika-79db80.netlify.app",
-  "https://main--regal-pika-79db80.netlify.app/",
+  "https://regal-pika-79db80.netlify.app",
+  "https://regal-pika-79db80.netlify.app/",
 ];
 
 const corsOptions = {
