@@ -1,6 +1,8 @@
 const allowedOrigins = [
   "https://regal-pika-79db80.netlify.app",
   "https://regal-pika-79db80.netlify.app/",
+  "http://localhost:3000/",
+  "http://localhost:3000",
 ];
 
 const corsOptions = {
