@@ -10,6 +10,6 @@ const router = express.Router();
 //router.use(validateToken);
 router.route("/:id/:type").get(getProducts);
 router.route("/").get(getAllProducts);
-router.route("/add").post(createProduct);
+router.route("/create").post(createProduct);
 
 module.exports = router;
