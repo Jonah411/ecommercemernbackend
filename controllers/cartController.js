@@ -9,11 +9,11 @@ const getAllUserCart = asycHandler(async (req, res) => {
     .populate("items.product", "name price product_image")
     .exec()
     .then(async (carts) => {
-      const totalPrice = await calculateTotalPrice(user);
+      const subtotalPrice = await calculateTotalPrice(user);
       return res.status(200).json({
         message: "Carts retrieved successfully",
         carts: carts,
-        totalPrice: totalPrice,
+        totalPrice: subtotalPrice,
       });
     })
     .catch((error) => {
@@ -29,9 +29,7 @@ const createCart = asycHandler(async (req, res) => {
     const { user, items } = req.body;
     const productId = items[0].product._id;
     const quantity = 1;
-    // const cartData = await Cart.findOne({
-    //   "items.product": items[0].product._id,
-    // });
+
     // find the cart for the user
     Cart.findOne({ user: user })
       .populate("items.product", "name price product_image")
@@ -46,6 +44,7 @@ const createCart = asycHandler(async (req, res) => {
           cart = new Cart({
             user: user,
             items: [],
+            subtotalprice: 0,
           });
         }
 
@@ -56,26 +55,87 @@ const createCart = asycHandler(async (req, res) => {
 
         if (itemIndex === -1) {
           // add a new item to the cart if the product isn't already in it
-          cart.items.push({ product: productId, quantity });
+          const product = await Product.findById(productId);
+          const productprice = product.price;
+          cart.items.push({ product: productId, quantity, productprice });
         } else {
           // update the quantity of the existing item if the product is already in the cart
           cart.items[itemIndex].quantity += quantity;
         }
 
+        // calculate the total price of the cart
+        const totalPrice = await calculateTotalPrice(user.toString());
+        if (isNaN(totalPrice)) {
+          // handle the case where the subtotal is not a number
+        } else {
+          cart.subtotalprice = totalPrice.toFixed(2);
+          cart.totalprice = totalPrice.toFixed(2);
+        }
+
         // save the updated cart
         await cart.save();
 
-        // assuming you have middleware to extract the user ID from the request
-        const totalPrice = await calculateTotalPrice(user);
+        // return the updated cart
         return res.status(201).json({
           status: true,
           message: "Cart added successfully",
-          totalPrice: totalPrice,
+          cart: cart,
         });
       });
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
+  // try {
+  //   const { user, items } = req.body;
+  //   const productId = items[0].product._id;
+  //   const quantity = 1;
+  //   // const cartData = await Cart.findOne({
+  //   //   "items.product": items[0].product._id,
+  //   // });
+  //   // find the cart for the user
+  //   Cart.findOne({ user: user })
+  //     .populate("items.product", "name price product_image")
+  //     .exec(async (err, cart) => {
+  //       if (err) {
+  //         console.error(err);
+  //         return;
+  //       }
+
+  //       if (!cart) {
+  //         // create a new cart if one doesn't exist for the user
+  //         cart = new Cart({
+  //           user: user,
+  //           items: [],
+  //         });
+  //       }
+
+  //       // check if the product already exists in the cart
+  //       const itemIndex = cart.items.findIndex(
+  //         (item) => item.product._id.toString() === productId
+  //       );
+
+  //       if (itemIndex === -1) {
+  //         // add a new item to the cart if the product isn't already in it
+  //         cart.items.push({ product: productId, quantity });
+  //       } else {
+  //         // update the quantity of the existing item if the product is already in the cart
+  //         cart.items[itemIndex].quantity += quantity;
+  //       }
+
+  //       // save the updated cart
+  //       await cart.save();
+
+  //       // assuming you have middleware to extract the user ID from the request
+  //       const totalPrice = await calculateTotalPrice(user);
+  //       return res.status(201).json({
+  //         status: true,
+  //         message: "Cart added successfully",
+  //         totalPrice: totalPrice,
+  //       });
+  //     });
+  // } catch (err) {
+  //   res.status(500).json({ error: "Internal server error" });
+  // }
 });
 
 // if (!cartData) {
@@ -145,13 +205,11 @@ const singleDeleteCart = asycHandler(async (req, res) => {
 const updateCart = asycHandler(async (req, res) => {
   try {
     const userId = req.params.userId;
-    const productId = req.params.productId;
-    const newQuantity = req.body.quantity; // Get the new quantity from the request body
-
+    const newItems = req.body.items;
     // Find the cart item using the user's ID and the product's ID, and update the quantity
     const updatedCart = await Cart.findOneAndUpdate(
-      { user: userId, "items.product": productId },
-      { $set: { "items.$.quantity": newQuantity } },
+      { user: userId },
+      { items: newItems },
       { new: true } // Return the updated document
     );
 

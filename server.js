@@ -28,6 +28,7 @@ app.use("/api/wishlist", require("./routes/wishListRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/order", require("./routes/orderRoutes"));
 app.use("/api/address", require("./routes/addressRoutes"));
+app.use("/api/coupon", require("./routes/couponRoutes"));
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);

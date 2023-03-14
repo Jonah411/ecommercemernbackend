@@ -2,7 +2,6 @@ const Cart = require("../models/cartModels");
 const mongoose = require("mongoose");
 
 const calculateTotalPrice = async (userId) => {
-  console.log(userId);
   const pipeline = [
     {
       $match: { user: mongoose.Types.ObjectId(userId) },
