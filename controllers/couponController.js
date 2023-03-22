@@ -4,11 +4,17 @@ const { calculateTotalPrice } = require("../utills/CalculatePrice");
 const { calculatePrice } = require("../utills/CalculateTotalPrice");
 
 const applyCoupon = asycHandler(async (req, res) => {
-  const { cartId, couponCode } = req.body;
-  const cart = await Cart.findById(cartId);
-  if (!cart) {
-    return res.status(404).json({ message: "Cart not found" });
+  const { cartId, couponCode, totalProductPrice } = req.body;
+  let cartTotal = null;
+  if (cartId) {
+    const cart = await Cart.findById(cartId);
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+    cartTotal = await calculateTotalPrice(cart?.user.toString());
+    await cart.save();
   }
+
   let coupons = [
     {
       id: 1,
@@ -41,9 +47,11 @@ const applyCoupon = asycHandler(async (req, res) => {
     return res.status(404).json({ message: "Invalid coupon code" });
   }
 
-  const { minimum_purchase_amount, maximum_discount_amount } = coupon;
+  const { minimum_purchase_amount } = coupon;
 
-  const cartTotal = await calculateTotalPrice(cart?.user.toString());
+  if (totalProductPrice) {
+    cartTotal = totalProductPrice;
+  }
 
   if (cartTotal < minimum_purchase_amount) {
     return res.status(400).json({
@@ -55,7 +63,6 @@ const applyCoupon = asycHandler(async (req, res) => {
     cartTotal: cartTotal,
   };
   const totalPrice = await calculatePrice(data);
-  await cart.save();
 
   res.json({
     status: true,
