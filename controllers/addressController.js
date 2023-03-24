@@ -1,16 +1,31 @@
 const asycHandler = require("express-async-handler");
 const Address = require("../models/addressModels");
 
+// const getAllAddress = asycHandler(async (req, res) => {
+//   const user = req.params.id;
+//   const address = await Address.findOne({ user: user });
+//   if (address) {
+//     return res.status(200).json({
+//       data: address,
+//     });
+//   } else {
+//     return res.status(200).json({
+//       address: {},
+//     });
+//   }
+// });
 const getAllAddress = asycHandler(async (req, res) => {
-  const user = req.params.id;
-  const address = await Address.findOne({ user: user });
+  const userId = req.params.id;
+  const address = await Address.findOne({ user: userId });
   if (address) {
+    const mainAddress = address.address.find((a) => a.mainaddress === 1);
     return res.status(200).json({
       data: address,
+      mainAddress: mainAddress || address.address,
     });
   } else {
     return res.status(200).json({
-      address: {},
+      data: [],
     });
   }
 });
