@@ -10,7 +10,31 @@ const getProducts = asycHandler(async (req, res) => {
   const type = req.params.type;
   if (type === "category") {
     Product.find({ categories: id })
-      .populate("categories wishlist")
+      .populate({
+        path: "categories",
+        select: "name description categorie_image",
+        populate: [
+          {
+            path: "parent_categories",
+            select: "name description categorie_image",
+          },
+          {
+            path: "sub_categories",
+            select: "name description categorie_image",
+          },
+        ],
+      })
+      .populate({
+        path: "brands",
+        select: "name brand_image",
+      })
+      .populate({
+        path: "wishlist",
+        select: "user_id product_id",
+      })
+      .populate({
+        path: "rating_star.rating",
+      })
       .exec(function (err, products) {
         if (err) {
           try {
@@ -22,7 +46,31 @@ const getProducts = asycHandler(async (req, res) => {
   }
   if (type === "brand") {
     Product.find({ brands: id })
-      .populate("brands wishlist")
+      .populate({
+        path: "categories",
+        select: "name description categorie_image",
+        populate: [
+          {
+            path: "parent_categories",
+            select: "name description categorie_image",
+          },
+          {
+            path: "sub_categories",
+            select: "name description categorie_image",
+          },
+        ],
+      })
+      .populate({
+        path: "brands",
+        select: "name brand_image",
+      })
+      .populate({
+        path: "wishlist",
+        select: "user_id product_id",
+      })
+      .populate({
+        path: "rating_star.rating",
+      })
       .exec(function (err, products) {
         if (err) {
           try {
@@ -34,7 +82,31 @@ const getProducts = asycHandler(async (req, res) => {
   }
   if (type === "product") {
     Product.find({ _id: id })
-      .populate("categories brands wishlist")
+      .populate({
+        path: "categories",
+        select: "name description categorie_image",
+        populate: [
+          {
+            path: "parent_categories",
+            select: "name description categorie_image",
+          },
+          {
+            path: "sub_categories",
+            select: "name description categorie_image",
+          },
+        ],
+      })
+      .populate({
+        path: "brands",
+        select: "name brand_image",
+      })
+      .populate({
+        path: "wishlist",
+        select: "user_id product_id",
+      })
+      .populate({
+        path: "rating_star.rating",
+      })
       .exec(function (err, product) {
         if (err) {
           return res
@@ -96,6 +168,8 @@ const createProduct = asycHandler(async (req, res) => {
         product_image: singleImage[0],
         product_gallery: multipleImage,
         price: confiq.price,
+        product_strength: confiq.product_strength,
+        pack_size: confiq.pack_size,
         rating_star: confiq.rating_star,
         categories: confiq.categories,
         brands: confiq.brand,

@@ -34,7 +34,7 @@ const applyCoupon = asycHandler(async (req, res) => {
     },
     {
       id: 3,
-      code: "SALE20",
+      code: "SAVE20",
       description: "Get 20% off your purchase",
       expiration_date: "2023-06-30",
       minimum_purchase_amount: 100.0,
@@ -69,6 +69,7 @@ const applyCoupon = asycHandler(async (req, res) => {
     message: "Coupon applied successfully",
     totalPrice,
     subtotalPrice: cartTotal,
+    coupon: coupon,
   });
 });
 

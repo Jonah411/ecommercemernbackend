@@ -19,10 +19,24 @@ const productSchema = mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, "Please add the product price"],
+  },
+  product_strength: {
+    type: String,
+  },
+  pack_size: {
+    type: Number,
   },
   rating_star: {
-    type: Number,
+    rating: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Rating",
+      },
+    ],
+    rating_radio: {
+      type: Number,
+      default: () => 0,
+    },
   },
   wishlist: {
     type: mongoose.Schema.Types.ObjectId,
@@ -32,7 +46,6 @@ const productSchema = mongoose.Schema({
   categories: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categorie",
-    required: [true, "Please add the categorie"],
   },
   brands: {
     type: mongoose.Schema.Types.ObjectId,
