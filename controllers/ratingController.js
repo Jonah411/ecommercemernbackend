@@ -56,9 +56,9 @@ const createRating = asyncHandler(async (req, res) => {
         }
       }
 
-      const averageRating =
-        totalRating / savedProduct.rating_star.rating.length;
-
+      const averageRating = parseInt(
+        totalRating / savedProduct.rating_star.rating.length
+      );
       const updatedProduct = await Product.findByIdAndUpdate(
         confiq.productId,
         { $set: { "rating_star.rating_radio": averageRating } },
