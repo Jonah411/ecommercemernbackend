@@ -8,7 +8,7 @@ const {
 const router = express.Router();
 
 //router.use(validateToken);
-router.route("/:id/:type").get(getProducts);
+router.route("/:id/:type/:user?").get(getProducts);
 router.route("/").get(getAllProducts);
 router.route("/create").post(createProduct);
 

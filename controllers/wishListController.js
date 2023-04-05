@@ -21,7 +21,7 @@ const createWishList = asycHandler(async (req, res) => {
     });
     return res.status(200).json({
       success: true,
-      message: `Added to your Wishlist successfully!`,
+      msg: `Added to your Wishlist successfully!`,
       wishlist: wishlist,
     });
   } else {
@@ -41,7 +41,7 @@ const createWishList = asycHandler(async (req, res) => {
     });
     return res.status(200).json({
       success: true,
-      message: "Your Wishlist has been updated successfully!",
+      msg: "Your Wishlist has been updated successfully!",
       wishlist: wishlist,
     });
   }

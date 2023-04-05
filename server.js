@@ -30,6 +30,9 @@ app.use("/api/order", require("./routes/orderRoutes"));
 app.use("/api/address", require("./routes/addressRoutes"));
 app.use("/api/coupon", require("./routes/couponRoutes"));
 app.use("/api/rates", require("./routes/ratingRoutes"));
+app.use("/api/compare", require("./routes/compareProductRoutes"));
+app.use("/api/latestview", require("./routes/recentViewProductRoutes"));
+app.use("/api/relatedproduct", require("./routes/relatedProductRoutes"));
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);

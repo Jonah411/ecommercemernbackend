@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const RelatedProduct = require("./relatedProductsModels");
 
 const productSchema = mongoose.Schema({
   name: {
@@ -50,6 +51,10 @@ const productSchema = mongoose.Schema({
   brands: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Brand",
+  },
+  related_products: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "RelatedProduct",
   },
   date: {
     type: Date,

@@ -1,6 +1,10 @@
 const asycHandler = require("express-async-handler");
 const { productHandler } = require("../helpers/productUpload");
 const Product = require("../models/productModels");
+const { createReview } = require("./recentViewProductController");
+const User = require("../models/userModels");
+const { createRelated } = require("./relatedProductController");
+const RelatedProduct = require("../models/relatedProductsModels");
 
 //@desc Get all products
 //@route Get /api/product/
@@ -8,118 +12,133 @@ const Product = require("../models/productModels");
 const getProducts = asycHandler(async (req, res) => {
   const id = req.params.id;
   const type = req.params.type;
-  if (type === "category") {
-    Product.find({ categories: id })
-      .populate({
-        path: "categories",
-        select: "name description categorie_image",
-        populate: [
-          {
-            path: "parent_categories",
-            select: "name description categorie_image",
-          },
-          {
-            path: "sub_categories",
-            select: "name description categorie_image",
-          },
-        ],
-      })
-      .populate({
-        path: "brands",
-        select: "name brand_image",
-      })
-      .populate({
-        path: "wishlist",
-        select: "user_id product_id",
-      })
-      .populate({
-        path: "rating_star.rating",
-      })
-      .exec(function (err, products) {
-        if (err) {
-          try {
-            throw err;
-          } catch (error) {}
-        }
-        return res.status(200).json({ status: true, data: products });
-      });
-  }
-  if (type === "brand") {
-    Product.find({ brands: id })
-      .populate({
-        path: "categories",
-        select: "name description categorie_image",
-        populate: [
-          {
-            path: "parent_categories",
-            select: "name description categorie_image",
-          },
-          {
-            path: "sub_categories",
-            select: "name description categorie_image",
-          },
-        ],
-      })
-      .populate({
-        path: "brands",
-        select: "name brand_image",
-      })
-      .populate({
-        path: "wishlist",
-        select: "user_id product_id",
-      })
-      .populate({
-        path: "rating_star.rating",
-      })
-      .exec(function (err, products) {
-        if (err) {
-          try {
-            throw err;
-          } catch (error) {}
-        }
-        return res.status(200).json({ status: true, data: products });
-      });
-  }
-  if (type === "product") {
-    Product.find({ _id: id })
-      .populate({
-        path: "categories",
-        select: "name description categorie_image",
-        populate: [
-          {
-            path: "parent_categories",
-            select: "name description categorie_image",
-          },
-          {
-            path: "sub_categories",
-            select: "name description categorie_image",
-          },
-        ],
-      })
-      .populate({
-        path: "brands",
-        select: "name brand_image",
-      })
-      .populate({
-        path: "wishlist",
-        select: "user_id product_id",
-      })
-      .populate({
-        path: "rating_star.rating",
-      })
-      .exec(function (err, product) {
-        if (err) {
-          return res
-            .status(500)
-            .json({ status: false, message: "Error finding product" });
-        }
-        if (!product) {
-          return res
-            .status(404)
-            .json({ status: false, message: "Product not found" });
-        }
-        return res.status(200).json({ status: true, data: product });
-      });
+  const userData = req.params.user;
+  const userList = await User.findById(userData);
+
+  if (userList) {
+    await createReview(id, userList?._id);
+    if (type === "category") {
+      Product.find({ categories: id })
+        .populate({
+          path: "categories",
+          select: "name description categorie_image",
+          populate: [
+            {
+              path: "parent_categories",
+              select: "name description categorie_image",
+            },
+            {
+              path: "sub_categories",
+              select: "name description categorie_image",
+            },
+          ],
+        })
+        .populate({
+          path: "brands",
+          select: "name brand_image",
+        })
+        .populate({
+          path: "wishlist",
+          select: "user_id product_id",
+        })
+        .populate({
+          path: "rating_star.rating",
+        })
+        .exec(function (err, products) {
+          if (err) {
+            try {
+              throw err;
+            } catch (error) {}
+          }
+          return res.status(200).json({ status: true, data: products });
+        });
+    }
+    if (type === "brand") {
+      Product.find({ brands: id })
+        .populate({
+          path: "categories",
+          select: "name description categorie_image",
+          populate: [
+            {
+              path: "parent_categories",
+              select: "name description categorie_image",
+            },
+            {
+              path: "sub_categories",
+              select: "name description categorie_image",
+            },
+          ],
+        })
+        .populate({
+          path: "brands",
+          select: "name brand_image",
+        })
+        .populate({
+          path: "wishlist",
+          select: "user_id product_id",
+        })
+        .populate({
+          path: "rating_star.rating",
+        })
+        .exec(function (err, products) {
+          if (err) {
+            try {
+              throw err;
+            } catch (error) {}
+          }
+          return res.status(200).json({ status: true, data: products });
+        });
+    }
+    if (type === "product") {
+      Product.find({ _id: id })
+        .populate({
+          path: "categories",
+          select: "name description categorie_image",
+          populate: [
+            {
+              path: "parent_categories",
+              select: "name description categorie_image",
+            },
+            {
+              path: "sub_categories",
+              select: "name description categorie_image",
+            },
+          ],
+        })
+        .populate({
+          path: "brands",
+          select: "name brand_image",
+        })
+        .populate({
+          path: "wishlist",
+          select: "user_id product_id",
+        })
+        .populate({
+          path: "rating_star.rating",
+        })
+        .exec(async (err, product) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ status: false, message: "Error finding product" });
+          }
+          if (!product) {
+            return res
+              .status(404)
+              .json({ status: false, message: "Product not found" });
+          }
+
+          // const relatedProducts = await RelatedProduct.find({
+          //   _id: { $in: product.related_products },
+          // });
+          return res.status(200).json({
+            status: true,
+            data: product,
+          });
+        });
+    }
+  } else {
+    res.status(400).json("User is not defined");
   }
 });
 
@@ -162,19 +181,37 @@ const createProduct = asycHandler(async (req, res) => {
       name: confiq.name,
     });
     if (!product) {
-      await Product.create({
-        name: confiq.name,
-        description: confiq.description,
-        product_image: singleImage[0],
-        product_gallery: multipleImage,
-        price: confiq.price,
-        product_strength: confiq.product_strength,
-        pack_size: confiq.pack_size,
-        rating_star: confiq.rating_star,
-        categories: confiq.categories,
-        brands: confiq.brand,
-      });
-      res.status(201).json({ status: false, msg: "Product add successfully" });
+      try {
+        const newProduct = await Product.create({
+          name: confiq.name,
+          description: confiq.description,
+          product_image: singleImage[0],
+          product_gallery: multipleImage,
+          price: confiq.price,
+          product_strength: confiq.product_strength,
+          pack_size: confiq.pack_size,
+          rating_star: confiq.rating_star,
+          categories: confiq.categories,
+          brands: confiq.brand,
+        });
+        if (confiq.related_products) {
+          const relatedProduct = await createRelated(
+            newProduct._id,
+            confiq.related_products
+          );
+          const result = await Product.findOneAndUpdate(
+            { _id: newProduct._id },
+            { related_products: relatedProduct },
+            { upsert: true, new: true }
+          );
+          // newProduct.related_products = relatedProduct;
+        }
+        return res
+          .status(201)
+          .json({ status: false, msg: "Product add successfully" });
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       res
         .status(400)
