@@ -1,9 +1,10 @@
-const asycHandler = require("express-async-handler");
+const asyncHandler = require("express-async-handler");
 const Cart = require("../models/cartModels");
 const Product = require("../models/productModels");
 const { calculateTotalPrice } = require("../utills/CalculatePrice");
+const ProductDetails = require("../models/productDetailsModels");
 
-const getAllUserCart = asycHandler(async (req, res) => {
+const getAllUserCart = asyncHandler(async (req, res) => {
   const user = req.params.id;
   Cart.findOne({ user: user })
     .populate("items.product", "name price product_image")
@@ -24,13 +25,12 @@ const getAllUserCart = asycHandler(async (req, res) => {
     });
 });
 
-const createCart = asycHandler(async (req, res) => {
+const createCart = asyncHandler(async (req, res) => {
   try {
     const { user, items } = req.body;
     const productId = items[0].product._id;
-    const quantity = 1;
+    const quantity = items[0].quantity;
 
-    // find the cart for the user
     Cart.findOne({ user: user })
       .populate("items.product", "name price product_image")
       .exec(async (err, cart) => {
@@ -40,7 +40,6 @@ const createCart = asycHandler(async (req, res) => {
         }
 
         if (!cart) {
-          // create a new cart if one doesn't exist for the user
           cart = new Cart({
             user: user,
             items: [],
@@ -48,34 +47,33 @@ const createCart = asycHandler(async (req, res) => {
           });
         }
 
-        // check if the product already exists in the cart
         const itemIndex = cart.items.findIndex(
-          (item) => item.product._id.toString() === productId
+          (item) =>
+            item.product &&
+            item.product._id &&
+            item.product._id.toString() === productId
         );
 
         if (itemIndex === -1) {
-          // add a new item to the cart if the product isn't already in it
-          const product = await Product.findById(productId);
+          const product = await ProductDetails.findById(productId);
+
           const productprice = product.price;
           cart.items.push({ product: productId, quantity, productprice });
         } else {
-          // update the quantity of the existing item if the product is already in the cart
           cart.items[itemIndex].quantity += quantity;
         }
 
-        // calculate the total price of the cart
+        cart.items = cart.items.filter((item) => item.product);
+
         const totalPrice = await calculateTotalPrice(user.toString());
         if (isNaN(totalPrice)) {
-          // handle the case where the subtotal is not a number
         } else {
           cart.subtotalprice = totalPrice.toFixed(2);
           cart.totalprice = totalPrice.toFixed(2);
         }
 
-        // save the updated cart
         await cart.save();
 
-        // return the updated cart
         return res.status(201).json({
           status: true,
           message: "Cart added successfully",
@@ -85,57 +83,6 @@ const createCart = asycHandler(async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
-  // try {
-  //   const { user, items } = req.body;
-  //   const productId = items[0].product._id;
-  //   const quantity = 1;
-  //   // const cartData = await Cart.findOne({
-  //   //   "items.product": items[0].product._id,
-  //   // });
-  //   // find the cart for the user
-  //   Cart.findOne({ user: user })
-  //     .populate("items.product", "name price product_image")
-  //     .exec(async (err, cart) => {
-  //       if (err) {
-  //         console.error(err);
-  //         return;
-  //       }
-
-  //       if (!cart) {
-  //         // create a new cart if one doesn't exist for the user
-  //         cart = new Cart({
-  //           user: user,
-  //           items: [],
-  //         });
-  //       }
-
-  //       // check if the product already exists in the cart
-  //       const itemIndex = cart.items.findIndex(
-  //         (item) => item.product._id.toString() === productId
-  //       );
-
-  //       if (itemIndex === -1) {
-  //         // add a new item to the cart if the product isn't already in it
-  //         cart.items.push({ product: productId, quantity });
-  //       } else {
-  //         // update the quantity of the existing item if the product is already in the cart
-  //         cart.items[itemIndex].quantity += quantity;
-  //       }
-
-  //       // save the updated cart
-  //       await cart.save();
-
-  //       // assuming you have middleware to extract the user ID from the request
-  //       const totalPrice = await calculateTotalPrice(user);
-  //       return res.status(201).json({
-  //         status: true,
-  //         message: "Cart added successfully",
-  //         totalPrice: totalPrice,
-  //       });
-  //     });
-  // } catch (err) {
-  //   res.status(500).json({ error: "Internal server error" });
-  // }
 });
 
 // if (!cartData) {
@@ -154,7 +101,7 @@ const createCart = asycHandler(async (req, res) => {
 //   });
 // }
 
-const getCartProducts = asycHandler(async (req, res) => {
+const getCartProducts = asyncHandler(async (req, res) => {
   const productid = req.params.id;
   Product.findById(productid)
     .select("name price product_image")
@@ -173,7 +120,7 @@ const getCartProducts = asycHandler(async (req, res) => {
     });
 });
 
-const deleteCart = asycHandler(async (req, res) => {
+const deleteCart = asyncHandler(async (req, res) => {
   Cart.deleteMany({})
     .then((result) => {
       console.log(`Deleted ${result.deletedCount} documents`);
@@ -183,7 +130,7 @@ const deleteCart = asycHandler(async (req, res) => {
     });
 });
 
-const singleDeleteCart = asycHandler(async (req, res) => {
+const singleDeleteCart = asyncHandler(async (req, res) => {
   const { productid, userid } = req.body;
   Cart.findOneAndUpdate(
     { user: userid },
@@ -202,7 +149,7 @@ const singleDeleteCart = asycHandler(async (req, res) => {
   );
 });
 
-const updateCart = asycHandler(async (req, res) => {
+const updateCart = asyncHandler(async (req, res) => {
   try {
     const userId = req.params.userId;
     const newItems = req.body.items;

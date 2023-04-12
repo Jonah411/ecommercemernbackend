@@ -21,7 +21,6 @@ const getRelatedProducts = asyncHandler(async (req, res) => {
   const relatedProduct = await RelatedProduct.findOne({
     _id: relatedId,
   }).populate("product_list");
-  console.log(relatedProduct);
   return res.status(200).json({
     status: true,
     data: relatedProduct,

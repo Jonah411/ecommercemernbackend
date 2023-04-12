@@ -5,6 +5,8 @@ const { createReview } = require("./recentViewProductController");
 const User = require("../models/userModels");
 const { createRelated } = require("./relatedProductController");
 const RelatedProduct = require("../models/relatedProductsModels");
+const ProductDetails = require("../models/productDetailsModels");
+const { getGroupedProductDetails } = require("./productDetailsController");
 
 //@desc Get all products
 //@route Get /api/product/
@@ -14,13 +16,12 @@ const getProducts = asycHandler(async (req, res) => {
   const type = req.params.type;
   const userData = req.params.user;
   const userList = await User.findById(userData);
-
   if (userList) {
     await createReview(id, userList?._id);
     if (type === "category") {
-      Product.find({ categories: id })
+      ProductDetails.find({ categories: id })
         .populate({
-          path: "categories",
+          path: "categorie",
           select: "name description categorie_image",
           populate: [
             {
@@ -34,7 +35,7 @@ const getProducts = asycHandler(async (req, res) => {
           ],
         })
         .populate({
-          path: "brands",
+          path: "brand",
           select: "name brand_image",
         })
         .populate({
@@ -54,9 +55,9 @@ const getProducts = asycHandler(async (req, res) => {
         });
     }
     if (type === "brand") {
-      Product.find({ brands: id })
+      ProductDetails.find({ brands: id })
         .populate({
-          path: "categories",
+          path: "categorie",
           select: "name description categorie_image",
           populate: [
             {
@@ -70,7 +71,7 @@ const getProducts = asycHandler(async (req, res) => {
           ],
         })
         .populate({
-          path: "brands",
+          path: "brand",
           select: "name brand_image",
         })
         .populate({
@@ -90,9 +91,9 @@ const getProducts = asycHandler(async (req, res) => {
         });
     }
     if (type === "product") {
-      Product.find({ _id: id })
+      ProductDetails.findOne({ _id: id })
         .populate({
-          path: "categories",
+          path: "categorie",
           select: "name description categorie_image",
           populate: [
             {
@@ -106,7 +107,7 @@ const getProducts = asycHandler(async (req, res) => {
           ],
         })
         .populate({
-          path: "brands",
+          path: "brand",
           select: "name brand_image",
         })
         .populate({
@@ -116,6 +117,13 @@ const getProducts = asycHandler(async (req, res) => {
         .populate({
           path: "rating_star.rating",
         })
+        .populate({
+          path: "simple_product",
+        })
+        .populate({
+          path: "group_product",
+        })
+
         .exec(async (err, product) => {
           if (err) {
             return res
@@ -127,14 +135,25 @@ const getProducts = asycHandler(async (req, res) => {
               .status(404)
               .json({ status: false, message: "Product not found" });
           }
+          if (product.group_product) {
+            const GroupProductDetails = await getGroupedProductDetails(
+              product.group_product._id
+            );
+            return res.status(200).json({
+              status: true,
+              data: product,
+              GroupProductDetails: GroupProductDetails,
+            });
+          } else {
+            return res.status(200).json({
+              status: true,
+              data: product,
+            });
+          }
 
           // const relatedProducts = await RelatedProduct.find({
           //   _id: { $in: product.related_products },
           // });
-          return res.status(200).json({
-            status: true,
-            data: product,
-          });
         });
     }
   } else {
@@ -144,16 +163,26 @@ const getProducts = asycHandler(async (req, res) => {
 
 const getAllProducts = asycHandler(async (req, res) => {
   //const products = await Product.find({});
-  Product.find({})
-    .populate("categories brands wishlist")
-    .exec(function (err, products) {
-      if (err) {
-        try {
-          throw err;
-        } catch (error) {}
-      }
-      res.status(200).json({ status: true, data: products });
-    });
+  // Product.find({})
+  //   .populate("categories brands wishlist")
+  //   .exec(function (err, products) {
+  //     if (err) {
+  //       try {
+  //         throw err;
+  //       } catch (error) {}
+  //     }
+  //     res.status(200).json({ status: true, data: products });
+  //   });
+  try {
+    const productDetails = await ProductDetails.find({}).populate(
+      "categorie brand wishlist simple_product group_product"
+    );
+
+    res.status(200).json({ success: true, data: productDetails });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
 });
 
 const parseJson = (data) => {
