@@ -7,7 +7,11 @@ const ProductDetails = require("../models/productDetailsModels");
 const getAllUserCart = asyncHandler(async (req, res) => {
   const user = req.params.id;
   Cart.findOne({ user: user })
-    .populate("items.product", "name price product_image")
+    .populate({
+      path: "items.product",
+      select: "name price product_image simple_product",
+      populate: { path: "simple_product" },
+    })
     .exec()
     .then(async (carts) => {
       const subtotalPrice = await calculateTotalPrice(user);
@@ -32,13 +36,13 @@ const createCart = asyncHandler(async (req, res) => {
     const quantity = items[0].quantity;
 
     Cart.findOne({ user: user })
-      .populate("items.product", "name price product_image")
+      .populate("items.product", "name price product_image simple_product")
+      .populate({ path: "items.product.simple_product" })
       .exec(async (err, cart) => {
         if (err) {
           console.error(err);
           return;
         }
-
         if (!cart) {
           cart = new Cart({
             user: user,
@@ -55,12 +59,38 @@ const createCart = asyncHandler(async (req, res) => {
         );
 
         if (itemIndex === -1) {
-          const product = await ProductDetails.findById(productId);
-
+          const product = await ProductDetails.findById(productId).populate(
+            "simple_product"
+          );
           const productprice = product.price;
-          cart.items.push({ product: productId, quantity, productprice });
+          if (product.simple_product.stock_status === "Out of stock") {
+            return res.status(404).json({
+              status: false,
+              msg: "Product out of stock",
+            });
+          } else {
+            cart.items.push({ product: productId, quantity, productprice });
+          }
         } else {
-          cart.items[itemIndex].quantity += quantity;
+          const product = await ProductDetails.findById(productId).populate(
+            "simple_product"
+          );
+          if (product.simple_product.sold_individually) {
+            return res.status(404).json({
+              status: false,
+              msg: "Limit purchases to 1 item per order",
+            });
+          } else {
+            console.log(product.simple_product.stock_status);
+            if (product.simple_product.stock_status === "Out of stock") {
+              return res.status(404).json({
+                status: false,
+                msg: "Product out of stock",
+              });
+            } else {
+              cart.items[itemIndex].quantity += quantity;
+            }
+          }
         }
 
         cart.items = cart.items.filter((item) => item.product);
@@ -76,7 +106,7 @@ const createCart = asyncHandler(async (req, res) => {
 
         return res.status(201).json({
           status: true,
-          message: "Cart added successfully",
+          msg: "Cart added successfully",
           cart: cart,
         });
       });

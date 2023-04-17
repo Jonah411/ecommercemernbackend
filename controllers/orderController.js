@@ -1,6 +1,7 @@
 const asycHandler = require("express-async-handler");
 const Cart = require("../models/cartModels");
 const Order = require("../models/orderModels");
+const { stockQuantity } = require("../utills/StockQuantityManage");
 const stripe = require("stripe")(process.env.StripeAPIKey);
 
 const getOrder = asycHandler(async (req, res) => {
@@ -37,14 +38,21 @@ const getOrder = asycHandler(async (req, res) => {
 
 const createOrder = asycHandler(async (req, res) => {
   try {
-    const { user, items, totalPrice } = req.body;
-    const order = await Order.create({ user, items, totalPrice });
+    const { user, items, totalPrice, billingaddress, subtotalPrice } = req.body;
+    const order = await Order.create({
+      user,
+      items,
+      totalPrice,
+      billingaddress,
+      subtotalPrice,
+    });
     if (order) {
+      await stockQuantity(order);
       await Cart.deleteOne({ user: user });
     }
     return res.status(201).json({
       status: true,
-      message: "Order added successfully",
+      msg: "Order added successfully",
       order: order,
     });
   } catch (err) {

@@ -86,6 +86,7 @@ const createProduct = asyncHandler(async (req, res) => {
       if (!product_detail) {
         const {
           name,
+          email,
           description,
           short_description,
           categorie,
@@ -102,6 +103,7 @@ const createProduct = asyncHandler(async (req, res) => {
             if (product) {
               const ProductDetailsAdd = await ProductDetails.create({
                 name,
+                email,
                 description,
                 short_description,
                 categorie,
@@ -126,6 +128,7 @@ const createProduct = asyncHandler(async (req, res) => {
             if (product) {
               const ProductDetailsAdd = await ProductDetails.create({
                 name,
+                email,
                 description,
                 short_description,
                 categorie,
@@ -192,6 +195,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       const {
         productId,
         name,
+        email,
         description,
         short_description,
         categorie,
@@ -209,6 +213,7 @@ const updateProduct = asyncHandler(async (req, res) => {
               { _id: productId },
               {
                 name,
+                email,
                 description,
                 short_description,
                 categorie,
@@ -245,6 +250,7 @@ const updateProduct = asyncHandler(async (req, res) => {
               { _id: productId },
               {
                 name,
+                email,
                 description,
                 short_description,
                 categorie,
@@ -318,7 +324,7 @@ const getGroupedProductDetails = async (productId) => {
 };
 const dropProductDetails = asyncHandler(async (req, res) => {
   const productId = req.params.productId;
-  console.log("deleteee", productId);
+
   try {
     const deleteProduct = await ProductDetails.deleteOne({ _id: productId });
     return res.status(200).json({

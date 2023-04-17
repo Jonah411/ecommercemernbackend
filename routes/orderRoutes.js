@@ -11,7 +11,7 @@ const router = express.Router();
 
 //router.use("/", validateToken);
 router.route("/getorder/:id/:type").get(getOrder);
-router.route("/createorder").post(createOrder);
-router.route("/addorder").post(addOrder);
+//router.route("/createorder").post(createOrder);
+router.route("/addorder").post(createOrder);
 
 module.exports = router;

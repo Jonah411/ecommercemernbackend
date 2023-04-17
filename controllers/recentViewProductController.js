@@ -6,9 +6,9 @@ const ProductDetails = require("../models/productDetailsModels");
 const createReview = async (id, user) => {
   if (user) {
     try {
-      const updatedRecentViewProduct = await RecentViewProduct.findOneAndUpdate(
-        { userId: user },
-        { $push: { products: id } },
+      await RecentViewProduct.findOneAndUpdate(
+        { userId: user, products: { $ne: id } }, // Use $ne to check if product is not already present in the array
+        { $addToSet: { products: id } }, // Use $addToSet to add product only if it doesn't already exist in the array
         { upsert: true, new: true }
       ).lean();
     } catch (err) {

@@ -5,6 +5,9 @@ const ProductDetailsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+  },
   description: {
     type: String,
     required: true,
