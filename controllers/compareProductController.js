@@ -1,6 +1,6 @@
 const asycHandler = require("express-async-handler");
 const CompareProduct = require("../models/compareModels");
-const Product = require("../models/productModels");
+const { ProductDetails } = require("../models/productDetailsModels");
 const User = require("../models/userModels");
 
 const getAllCompareList = asycHandler(async (req, res) => {
@@ -13,6 +13,9 @@ const getAllCompareList = asycHandler(async (req, res) => {
 
     const compareProduct = await CompareProduct.findOne({ userId }).populate({
       path: "products.productId",
+      populate: {
+        path: "simple_product",
+      },
     });
     if (!compareProduct) {
       return res.status(404).send("Compare product list not found");
@@ -34,8 +37,8 @@ const createCompareList = asycHandler(async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    const product = await Product.findById(productId).populate(
-      "categories brands"
+    const product = await ProductDetails.findById(productId).populate(
+      "categorie brand"
     );
     if (!product) {
       res.status(404).json({ msg: "Product not found" });
@@ -64,8 +67,8 @@ const createCompareList = asycHandler(async (req, res) => {
         rating: product.rating_star.rating_radio,
         product_strength: product.product_strength,
         pack_size: product.pack_size,
-        categorie: product.categories.name,
-        brand: product.brands.name,
+        categorie: product.categorie.name,
+        brand: product.brand.name,
         image_name: product.product_image,
       });
       await compareProduct.save();
@@ -84,8 +87,8 @@ const createCompareList = asycHandler(async (req, res) => {
             rating: product.rating_star.rating_radio,
             product_strength: product.product_strength,
             pack_size: product.pack_size,
-            categorie: product.categories.name,
-            brand: product.brands.name,
+            categorie: product.categorie.name,
+            brand: product.brand.name,
             image_name: product.product_image,
           },
         ],

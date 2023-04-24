@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const RecentViewProduct = require("../models/recentViewProductModels");
 const Product = require("../models/productModels");
-const ProductDetails = require("../models/productDetailsModels");
+const { ProductDetails } = require("../models/productDetailsModels");
 
 const createReview = async (id, user) => {
   if (user) {

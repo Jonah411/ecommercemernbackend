@@ -1,5 +1,9 @@
 const asyncHandler = require("express-async-handler");
-const ProductDetails = require("../models/productDetailsModels");
+const {
+  setProductPrice,
+  ProductDetailsSchema,
+  ProductDetails,
+} = require("../models/productDetailsModels"); // import ProductDetailsSchema
 const ProductTypes = require("../models/productTypesModels");
 const { productHandler } = require("../helpers/productUpload");
 const {
@@ -10,6 +14,7 @@ const {
 } = require("../utills/ProductAdd");
 const GroupedProduct = require("../models/productGroupedModels");
 
+ProductDetailsSchema.pre("save", setProductPrice);
 const getProductTypes = asyncHandler(async (req, res) => {
   try {
     const productTypes = await ProductTypes.find({});
@@ -91,7 +96,7 @@ const createProduct = asyncHandler(async (req, res) => {
           short_description,
           categorie,
           brand,
-          price,
+          regular_price,
           sale_price,
           sale_price_start,
           sale_price_end,
@@ -108,7 +113,7 @@ const createProduct = asyncHandler(async (req, res) => {
                 short_description,
                 categorie,
                 brand,
-                price,
+                regular_price,
                 sale_price,
                 sale_price_start,
                 sale_price_end,
@@ -133,7 +138,6 @@ const createProduct = asyncHandler(async (req, res) => {
                 short_description,
                 categorie,
                 brand,
-                price,
                 productType: productType._id,
                 group_product: product._id,
                 product_image: singleImage[0],
@@ -200,7 +204,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         short_description,
         categorie,
         brand,
-        price,
+        regular_price,
         sale_price,
         sale_price_start,
         sale_price_end,
@@ -218,7 +222,7 @@ const updateProduct = asyncHandler(async (req, res) => {
                 short_description,
                 categorie,
                 brand,
-                price,
+                regular_price,
                 sale_price,
                 sale_price_start,
                 sale_price_end,
@@ -231,6 +235,7 @@ const updateProduct = asyncHandler(async (req, res) => {
               },
               { new: true }
             );
+            await ProductDetailsUpdate.save();
             return res.status(200).json({
               data: ProductDetailsUpdate,
               msg: "Product Update Successfully!",
@@ -244,7 +249,6 @@ const updateProduct = asyncHandler(async (req, res) => {
             req,
             res
           );
-          console.log(product);
           if (product) {
             const ProductDetailsUpdate = await ProductDetails.findOneAndUpdate(
               { _id: productId },
@@ -255,10 +259,6 @@ const updateProduct = asyncHandler(async (req, res) => {
                 short_description,
                 categorie,
                 brand,
-                price,
-                sale_price,
-                sale_price_start,
-                sale_price_end,
                 product_image: singleImage[0],
                 product_gallery: multipleImage,
                 productType: productType._id,
@@ -299,7 +299,9 @@ const getAllProductDetails = asyncHandler(async (req, res) => {
     const productDetails = await ProductDetails.find({}).populate(
       "categorie brand wishlist simple_product group_product"
     );
-
+    for (let i = 0; i < productDetails.length; i++) {
+      await productDetails[i].save();
+    }
     return res.status(200).json({ success: true, data: productDetails });
   } catch (error) {
     console.error(error);
@@ -336,6 +338,7 @@ const dropProductDetails = asyncHandler(async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error" });
   }
 });
+
 module.exports = {
   getProductTypes,
   createProductTypes,

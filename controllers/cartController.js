@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Cart = require("../models/cartModels");
 const Product = require("../models/productModels");
 const { calculateTotalPrice } = require("../utills/CalculatePrice");
-const ProductDetails = require("../models/productDetailsModels");
+const { ProductDetails } = require("../models/productDetailsModels");
 
 const getAllUserCart = asyncHandler(async (req, res) => {
   const user = req.params.id;
@@ -75,7 +75,7 @@ const createCart = asyncHandler(async (req, res) => {
           const product = await ProductDetails.findById(productId).populate(
             "simple_product"
           );
-          if (product.simple_product.sold_individually) {
+          if (product.simple_product.quantity_status === "sold_individually") {
             return res.status(404).json({
               status: false,
               msg: "Limit purchases to 1 item per order",
@@ -86,6 +86,14 @@ const createCart = asyncHandler(async (req, res) => {
               return res.status(404).json({
                 status: false,
                 msg: "Product out of stock",
+              });
+            } else if (
+              product.simple_product.stock_quantity <=
+              cart.items[itemIndex].quantity
+            ) {
+              return res.status(404).json({
+                status: false,
+                msg: `Product stock quantity is ${product.simple_product.stock_quantity}`,
               });
             } else {
               cart.items[itemIndex].quantity += quantity;

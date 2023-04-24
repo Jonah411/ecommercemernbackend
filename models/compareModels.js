@@ -10,7 +10,7 @@ const compareProductSchema = new mongoose.Schema({
     {
       productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "ProductDetails",
         required: true,
       },
       name: {

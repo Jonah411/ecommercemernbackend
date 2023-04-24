@@ -5,12 +5,14 @@ const { createReview } = require("./recentViewProductController");
 const User = require("../models/userModels");
 const { createRelated } = require("./relatedProductController");
 const RelatedProduct = require("../models/relatedProductsModels");
-const ProductDetails = require("../models/productDetailsModels");
+const {
+  setProductPrice,
+  ProductDetailsSchema,
+  ProductDetails,
+} = require("../models/productDetailsModels");
 const { getGroupedProductDetails } = require("./productDetailsController");
 
-//@desc Get all products
-//@route Get /api/product/
-//@access public
+ProductDetailsSchema.pre("save", setProductPrice);
 const getProducts = asycHandler(async (req, res) => {
   const id = req.params.id;
   const type = req.params.type;
@@ -177,7 +179,9 @@ const getAllProducts = asycHandler(async (req, res) => {
     const productDetails = await ProductDetails.find({}).populate(
       "categorie brand wishlist simple_product group_product"
     );
-
+    for (let i = 0; i < productDetails.length; i++) {
+      await productDetails[i].save();
+    }
     res.status(200).json({ success: true, data: productDetails });
   } catch (error) {
     console.error(error);

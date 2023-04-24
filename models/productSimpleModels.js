@@ -18,7 +18,10 @@ const SimpleProductSchema = new mongoose.Schema({
       ref: "ProductDetails",
     },
   ],
-
+  attributes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Attributes",
+  },
   sku: {
     type: String,
     // required: true,
@@ -33,6 +36,12 @@ const SimpleProductSchema = new mongoose.Schema({
   sold_individually: {
     type: Boolean,
     default: () => false,
+  },
+  quantity_status: {
+    type: String,
+  },
+  min_stock_quantity: {
+    type: Number,
   },
   backorders_status: {
     type: String,

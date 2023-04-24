@@ -20,6 +20,9 @@ const ProductDetailsSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+  regular_price: {
+    type: Number,
+  },
   sale_price: {
     type: Number,
   },
@@ -85,5 +88,25 @@ const ProductDetailsSchema = new mongoose.Schema({
   },
 });
 
+const setProductPrice = function (next) {
+  if (this.sale_price && this.sale_price_end && this.sale_price_start) {
+    const currentDate = new Date();
+    if (
+      currentDate >= this.sale_price_start &&
+      currentDate <= this.sale_price_end
+    ) {
+      this.price = this.sale_price;
+    } else {
+      this.price = this.regular_price;
+    }
+  } else {
+    this.price = this.regular_price;
+  }
+  next();
+};
+
+ProductDetailsSchema.pre("save", setProductPrice);
+
 const ProductDetails = mongoose.model("ProductDetails", ProductDetailsSchema);
-module.exports = ProductDetails;
+
+module.exports = { ProductDetailsSchema, ProductDetails, setProductPrice };

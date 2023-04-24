@@ -34,6 +34,7 @@ app.use("/api/compare", require("./routes/compareProductRoutes"));
 app.use("/api/latestview", require("./routes/recentViewProductRoutes"));
 app.use("/api/relatedproduct", require("./routes/relatedProductRoutes"));
 app.use("/api/productdetails", require("./routes/productDetailsRoutes"));
+app.use("/api/attribute", require("./routes/attributesRoutes"));
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);

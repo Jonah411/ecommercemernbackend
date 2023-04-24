@@ -1,3 +1,4 @@
+const Attributes = require("../models/attributesModels");
 const GroupedProduct = require("../models/productGroupedModels");
 const SimpleProduct = require("../models/productSimpleModels");
 
@@ -12,9 +13,18 @@ const addSimpleProduct = async (productData) => {
     stock_threshold,
     manage_stock,
     sold_individually,
+    quantity_status,
+    min_stock_quantity,
     related_products,
     like_products,
+    attributes,
   } = productData;
+  const attributesData = await Attributes.create(attributes);
+
+  const attributesList = [];
+  attributesData.forEach((element) => {
+    attributesList.push(element._id);
+  });
   const simpleProduct = await SimpleProduct.create({
     strength,
     pack_size,
@@ -23,10 +33,13 @@ const addSimpleProduct = async (productData) => {
     manage_stock,
     sold_individually,
     stock_quantity,
+    quantity_status,
+    min_stock_quantity,
     backorders_status,
     stock_threshold,
     related_products,
     like_products,
+    attributes: attributesList,
   });
   return simpleProduct;
 };
@@ -42,6 +55,8 @@ const updateSimpleProduct = async (productData, product_detail, req, res) => {
     stock_threshold,
     manage_stock,
     sold_individually,
+    quantity_status,
+    min_stock_quantity,
     related_products,
     like_products,
   } = productData;
@@ -55,6 +70,8 @@ const updateSimpleProduct = async (productData, product_detail, req, res) => {
           sku,
           manage_stock,
           sold_individually,
+          quantity_status,
+          min_stock_quantity,
           stock_status,
           stock_quantity,
           backorders_status,
