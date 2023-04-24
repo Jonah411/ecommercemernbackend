@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const reviewsHandler = require("../helpers/reviewUpload");
-const Product = require("../models/productModels");
 const Rating = require("../models/ratingModels");
+const { ProductDetails } = require("../models/productDetailsModels");
 
 const parseJson = (data) => {
   let field = "json_data";
@@ -26,7 +26,7 @@ const createRating = asyncHandler(async (req, res) => {
     });
 
     try {
-      const product = await Product.findById(confiq.productId)
+      const product = await ProductDetails.findById(confiq.productId)
         .populate("rating_star.rating")
         .exec();
 
@@ -59,7 +59,7 @@ const createRating = asyncHandler(async (req, res) => {
       const averageRating = parseInt(
         totalRating / savedProduct.rating_star.rating.length
       );
-      const updatedProduct = await Product.findByIdAndUpdate(
+      const updatedProduct = await ProductDetails.findByIdAndUpdate(
         confiq.productId,
         { $set: { "rating_star.rating_radio": averageRating } },
         { new: true }
