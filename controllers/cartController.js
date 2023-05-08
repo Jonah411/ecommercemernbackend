@@ -9,8 +9,8 @@ const getAllUserCart = asyncHandler(async (req, res) => {
   Cart.findOne({ user: user })
     .populate({
       path: "items.product",
-      select: "name price product_image simple_product",
-      populate: { path: "simple_product" },
+      select: "name price product_image simple_product variable_product",
+      populate: { path: "simple_product variable_product" },
     })
     .exec()
     .then(async (carts) => {
@@ -36,8 +36,12 @@ const createCart = asyncHandler(async (req, res) => {
     const quantity = items[0].quantity;
 
     Cart.findOne({ user: user })
-      .populate("items.product", "name price product_image simple_product")
+      .populate(
+        "items.product",
+        "name price product_image simple_product variable_product"
+      )
       .populate({ path: "items.product.simple_product" })
+      .populate({ path: "items.product.variable_product" })
       .exec(async (err, cart) => {
         if (err) {
           console.error(err);
@@ -60,43 +64,85 @@ const createCart = asyncHandler(async (req, res) => {
 
         if (itemIndex === -1) {
           const product = await ProductDetails.findById(productId).populate(
-            "simple_product"
+            "simple_product variable_product"
           );
           const productprice = product.price;
-          if (product.simple_product.stock_status === "Out of stock") {
-            return res.status(404).json({
-              status: false,
-              msg: "Product out of stock",
-            });
-          } else {
-            cart.items.push({ product: productId, quantity, productprice });
-          }
-        } else {
-          const product = await ProductDetails.findById(productId).populate(
-            "simple_product"
-          );
-          if (product.simple_product.quantity_status === "sold_individually") {
-            return res.status(404).json({
-              status: false,
-              msg: "Limit purchases to 1 item per order",
-            });
-          } else {
-            console.log(product.simple_product.stock_status);
+          if (product.simple_product) {
             if (product.simple_product.stock_status === "Out of stock") {
               return res.status(404).json({
                 status: false,
                 msg: "Product out of stock",
               });
-            } else if (
-              product.simple_product.stock_quantity <=
-              cart.items[itemIndex].quantity
+            } else {
+              cart.items.push({ product: productId, quantity, productprice });
+            }
+          } else if (product.variable_product) {
+            if (product.variable_product.stock_status === "Out of stock") {
+              return res.status(404).json({
+                status: false,
+                msg: "Product out of stock",
+              });
+            } else {
+              cart.items.push({ product: productId, quantity, productprice });
+            }
+          }
+        } else {
+          const product = await ProductDetails.findById(productId).populate(
+            "simple_product variable_product"
+          );
+          if (product.simple_product) {
+            if (
+              product.simple_product.quantity_status === "sold_individually"
             ) {
               return res.status(404).json({
                 status: false,
-                msg: `Product stock quantity is ${product.simple_product.stock_quantity}`,
+                msg: "Limit purchases to 1 item per order",
               });
             } else {
-              cart.items[itemIndex].quantity += quantity;
+              console.log(product.simple_product.stock_status);
+              if (product.simple_product.stock_status === "Out of stock") {
+                return res.status(404).json({
+                  status: false,
+                  msg: "Product out of stock",
+                });
+              } else if (
+                product.simple_product.stock_quantity <=
+                cart.items[itemIndex].quantity
+              ) {
+                return res.status(404).json({
+                  status: false,
+                  msg: `Product stock quantity is ${product.simple_product.stock_quantity}`,
+                });
+              } else {
+                cart.items[itemIndex].quantity += quantity;
+              }
+            }
+          } else if (product.variable_product) {
+            if (
+              product.variable_product.quantity_status === "sold_individually"
+            ) {
+              return res.status(404).json({
+                status: false,
+                msg: "Limit purchases to 1 item per order",
+              });
+            } else {
+              console.log(product.variable_product.stock_status);
+              if (product.variable_product.stock_status === "Out of stock") {
+                return res.status(404).json({
+                  status: false,
+                  msg: "Product out of stock",
+                });
+              } else if (
+                product.variable_product.stock_quantity <=
+                cart.items[itemIndex].quantity
+              ) {
+                return res.status(404).json({
+                  status: false,
+                  msg: `Product stock quantity is ${product.variable_product.stock_quantity}`,
+                });
+              } else {
+                cart.items[itemIndex].quantity += quantity;
+              }
             }
           }
         }

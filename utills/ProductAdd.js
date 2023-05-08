@@ -1,6 +1,7 @@
 const Attributes = require("../models/attributesModels");
 const GroupedProduct = require("../models/productGroupedModels");
 const SimpleProduct = require("../models/productSimpleModels");
+const VariantsProduct = require("../models/productVariantsModels");
 
 const addSimpleProduct = async (productData) => {
   const {
@@ -136,9 +137,33 @@ const updateGroupedProduct = async (productData, product_detail, req, res) => {
   }
 };
 
+const addVariantsProduct = async (productData, product_detail, req, res) => {
+  const {
+    related_products,
+    like_products,
+    attributes,
+    defaultform,
+    variantId,
+  } = productData;
+  const attributesData = await Attributes.create(attributes);
+  const attributesList = [];
+  attributesData.forEach((element) => {
+    attributesList.push(element._id);
+  });
+  const variantsProduct = await VariantsProduct.create({
+    defaultform,
+    related_products,
+    like_products,
+    attributes: attributesList,
+    variantId,
+  });
+  return variantsProduct;
+};
+
 module.exports = {
   addSimpleProduct,
   addGroupedProduct,
   updateSimpleProduct,
   updateGroupedProduct,
+  addVariantsProduct,
 };

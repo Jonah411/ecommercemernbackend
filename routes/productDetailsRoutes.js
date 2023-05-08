@@ -7,6 +7,12 @@ const {
   updateProduct,
   dropProductDetails,
 } = require("../controllers/productDetailsController");
+const {
+  createVariableProductsVariants,
+  getVariableProduct,
+  getVariantsProduct,
+  updateVariantsProductDetails,
+} = require("../controllers/variableProductController");
 
 const router = express.Router();
 
@@ -16,4 +22,8 @@ router.route("/create_product").post(createProduct);
 router.route("/update_product").put(updateProduct);
 router.route("/drop_product/:productId").delete(dropProductDetails);
 router.route("/product").get(getAllProductDetails);
+router.route("/create_variable").post(createVariableProductsVariants);
+router.route("/get_variable/:ids").get(getVariableProduct);
+router.route("/get_variants/:ids").get(getVariantsProduct);
+router.route("/update_product/:id").post(updateVariantsProductDetails);
 module.exports = router;

@@ -125,6 +125,9 @@ const getProducts = asycHandler(async (req, res) => {
         .populate({
           path: "group_product",
         })
+        .populate({
+          path: "variable_product",
+        })
 
         .exec(async (err, product) => {
           if (err) {
@@ -177,7 +180,7 @@ const getAllProducts = asycHandler(async (req, res) => {
   //   });
   try {
     const productDetails = await ProductDetails.find({}).populate(
-      "categorie brand wishlist simple_product group_product"
+      "categorie brand wishlist simple_product group_product variable_product"
     );
     for (let i = 0; i < productDetails.length; i++) {
       await productDetails[i].save();

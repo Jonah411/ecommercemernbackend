@@ -4,15 +4,18 @@ const SimpleProduct = require("../models/productSimpleModels");
 
 const getAttributes = asycHandler(async (req, res) => {
   const ids = req.params.ids.split(",");
+
   try {
     const attributes = await Attributes.find({
       _id: { $in: ids },
     });
+    console.log("attributes", attributes);
     res.json(attributes);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 const createAttributes = asycHandler(async (req, res) => {
   try {
     const attribute = req.body;
@@ -35,6 +38,7 @@ const createAttributes = asycHandler(async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 const deleteAttributes = asycHandler(async (req, res) => {
   const id = req.params.id;
   try {
@@ -52,6 +56,7 @@ const deleteAttributes = asycHandler(async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 module.exports = {
   getAttributes,
   createAttributes,

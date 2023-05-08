@@ -9,11 +9,9 @@ const corsOptions = require("./config/corsOptions");
 connectDB();
 const app = express();
 
-app.use(cors(corsOptions)); // Use the cors middleware with the options
+app.use(cors(corsOptions));
 
-// Your routes and other middleware go here
-
-app.use(errorHandler); // Your error handler middleware
+app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
 

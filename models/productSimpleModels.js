@@ -7,10 +7,6 @@ const SimpleProductSchema = new mongoose.Schema({
       ref: "ProductDetails",
     },
   ],
-  pack_size: {
-    type: String,
-    // required: true,
-  },
 
   related_products: [
     {
@@ -18,9 +14,14 @@ const SimpleProductSchema = new mongoose.Schema({
       ref: "ProductDetails",
     },
   ],
+
   attributes: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Attributes",
+  },
+  pack_size: {
+    type: String,
+    // required: true,
   },
   sku: {
     type: String,
@@ -58,7 +59,6 @@ const SimpleProductSchema = new mongoose.Schema({
   },
   strength: {
     type: String,
-    // required: true,
   },
 });
 

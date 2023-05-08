@@ -11,6 +11,7 @@ const {
   addGroupedProduct,
   updateSimpleProduct,
   updateGroupedProduct,
+  addVariantsProduct,
 } = require("../utills/ProductAdd");
 const GroupedProduct = require("../models/productGroupedModels");
 
@@ -100,6 +101,7 @@ const createProduct = asyncHandler(async (req, res) => {
           sale_price,
           sale_price_start,
           sale_price_end,
+          variantId,
         } = confiq;
 
         switch (productType.name) {
@@ -150,7 +152,31 @@ const createProduct = asyncHandler(async (req, res) => {
             }
             break;
           case "Variable Product":
-            product = await addVariableProduct(req.body);
+            product = await addVariantsProduct(confiq);
+            const ProductDetailsAdd = await ProductDetails.create({
+              name,
+              email,
+              description,
+              short_description,
+              categorie,
+              brand,
+              variable_product: product._id,
+              productType: productType._id,
+              product_image: singleImage[0],
+              product_gallery: multipleImage,
+            });
+            if (ProductDetailsAdd) {
+              return res.status(200).json({
+                data: ProductDetailsAdd,
+                msg: "Product Added Successfully!",
+              });
+            } else {
+              return res.status(200).json({
+                data: ProductDetailsAdd,
+                msg: "Product Added unSuccessfully!",
+              });
+            }
+
             break;
           case "External / Affiliate Product":
             product = await addExternalProduct(req.body);
@@ -297,11 +323,12 @@ const updateProduct = asyncHandler(async (req, res) => {
 const getAllProductDetails = asyncHandler(async (req, res) => {
   try {
     const productDetails = await ProductDetails.find({}).populate(
-      "categorie brand wishlist simple_product group_product"
+      "categorie brand wishlist simple_product group_product variable_product"
     );
     for (let i = 0; i < productDetails.length; i++) {
       await productDetails[i].save();
     }
+
     return res.status(200).json({ success: true, data: productDetails });
   } catch (error) {
     console.error(error);

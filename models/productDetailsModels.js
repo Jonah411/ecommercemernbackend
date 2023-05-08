@@ -61,6 +61,11 @@ const ProductDetailsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "GroupedProduct",
   },
+  variable_product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "VariantsProduct",
+  },
+
   rating_star: {
     rating: [
       {
